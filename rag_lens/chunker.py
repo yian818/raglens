@@ -9,6 +9,8 @@ from dataclasses import dataclass
 
 # 中英文句末标点都作为句子边界
 _SENT_SPLIT = re.compile(r"(?<=[。！？；!?;])")
+# Markdown 标题行（# 到 ######）
+_HEADING = re.compile(r"^#{1,6}\s+.*$", re.M)
 
 
 @dataclass
@@ -62,6 +64,57 @@ def sentence_split(text: str, max_len: int):
     return pieces
 
 
+def markdown_heading_split(text: str, max_len: int = 0):
+    """按 Markdown 标题层级切分：每个章节保留标题本身作为开头，语义最完整。
+
+    max_len > 0 时，超长章节再按句子贪心二次切分（标题会保留在每段前面）。
+    """
+    matches = list(_HEADING.finditer(text))
+    if not matches:
+        piece = text.strip()
+        return [(piece, 0)] if piece else []
+
+    raw_sections = []
+    if matches[0].start() > 0:
+        pre = text[: matches[0].start()].strip()
+        if pre:
+            raw_sections.append(pre)
+    for i, m in enumerate(matches):
+        end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
+        sec = text[m.start():end].strip()
+        if sec:
+            raw_sections.append(sec)
+
+    if max_len <= 0:
+        return [(s, idx) for idx, s in enumerate(raw_sections)]
+
+    # 超长章节二次切分，保留标题上下文
+    pieces, idx = [], 0
+    for sec in raw_sections:
+        lines = sec.split("\n", 1)
+        heading = lines[0].strip()
+        body = lines[1].strip() if len(lines) > 1 else ""
+        if len(sec) <= max_len or not body:
+            pieces.append((sec, idx))
+            idx += 1
+            continue
+        sents = [s.strip() for s in _SENT_SPLIT.split(body) if s and s.strip()]
+        buf = ""
+        for s in sents:
+            cand = (heading + "\n" + buf) if buf else heading + "\n" + s
+            if len(cand) <= max_len:
+                buf = (buf + s) if buf else s
+            else:
+                if buf:
+                    pieces.append((heading + "\n" + buf, idx))
+                    idx += 1
+                buf = s
+        if buf:
+            pieces.append((heading + "\n" + buf, idx))
+            idx += 1
+    return pieces
+
+
 def chunk_document(doc_id: str, text: str, strategy_cfg: dict):
     """按某一种策略切分一篇文档，返回 Chunk 列表。"""
     stype = strategy_cfg["type"]
@@ -74,8 +127,12 @@ def chunk_document(doc_id: str, text: str, strategy_cfg: dict):
         )
     elif stype == "sentence":
         pieces = sentence_split(text, max_len=int(strategy_cfg.get("max_len", 300)))
+    elif stype == "markdown_heading":
+        pieces = markdown_heading_split(
+            text, max_len=int(strategy_cfg.get("max_len", 0))
+        )
     else:
-        raise ValueError(f"未知切片类型: {stype}（支持 fixed / sentence）")
+        raise ValueError(f"未知切片类型: {stype}（支持 fixed / sentence / markdown_heading）")
 
     return [
         Chunk(chunk_id=f"{name}:{doc_id}:{i}", doc_id=doc_id, text=piece, char_len=len(piece))

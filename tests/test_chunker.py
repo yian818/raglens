@@ -1,6 +1,11 @@
 import unittest
 
-from rag_lens.chunker import chunk_document, fixed_split, sentence_split
+from rag_lens.chunker import (
+    chunk_document,
+    fixed_split,
+    markdown_heading_split,
+    sentence_split,
+)
 
 
 class TestFixedSplit(unittest.TestCase):
@@ -38,6 +43,25 @@ class TestChunkDocument(unittest.TestCase):
     def test_unknown_type(self):
         with self.assertRaises(ValueError):
             chunk_document("a.md", "任意文本", {"name": "x", "type": "weird"})
+
+
+class TestMarkdownHeading(unittest.TestCase):
+    def test_sections_split_by_heading(self):
+        text = "# 标题一\n内容一。\n## 标题二\n内容二。"
+        pieces = markdown_heading_split(text)
+        self.assertEqual(len(pieces), 2)
+        self.assertTrue(pieces[0][0].startswith("# 标题一"))
+
+    def test_no_heading_falls_back(self):
+        pieces = markdown_heading_split("没有标题的一段文本。")
+        self.assertEqual(len(pieces), 1)
+
+    def test_long_section_resplits(self):
+        text = "# 长章节\n" + "句子。" * 50
+        pieces = markdown_heading_split(text, max_len=80)
+        self.assertGreater(len(pieces), 1)
+        # 二次切分后每段仍保留标题
+        self.assertTrue(all("长章节" in p[0] for p in pieces))
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
-{"query": "RAG 的基本流程包含哪几个步骤？", "expected_doc": "doc1_rag_basics.md"}
-{"query": "切片时重叠窗口 overlap 有什么作用？", "expected_doc": "doc1_rag_basics.md"}
+{"query": "RAG 的基本流程包含哪几个步骤？", "expected_doc": "doc1_rag_basics.md", "answer": "RAG 流程包括文档加载、切片、嵌入、检索和生成五个步骤。", "expected_chunk_hint": "文档加载"}
+{"query": "切片时重叠窗口 overlap 有什么作用？", "expected_doc": "doc1_rag_basics.md", "expected_chunk_hint": "重叠窗口"}
 {"query": "两个向量之间的相似度通常怎么计算？", "expected_doc": "doc1_rag_basics.md"}
-{"query": "什么是 HitRate@k 指标？", "expected_doc": "doc2_rag_eval.md"}
-{"query": "MRR 指标衡量的是什么？", "expected_doc": "doc2_rag_eval.md"}
+{"query": "什么是 HitRate@k 指标？", "expected_doc": "doc2_rag_eval.md", "answer": "HitRate@k 表示正确文档出现在前 k 名的问题占比。"}
+{"query": "MRR 指标衡量的是什么？", "expected_doc": "doc2_rag_eval.md", "expected_chunk_hint": "倒数排名"}
 {"query": "为什么 RAG 调试要做切片对比实验？", "expected_doc": "doc2_rag_eval.md"}

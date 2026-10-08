@@ -4,6 +4,8 @@ __pycache__/
 venv/
 .env
 report.html
+report.json
+compare.html
 dist/
 build/
 *.egg-info/

@@ -9,17 +9,19 @@
 - [x] 内置中文样例语料 + 6 条黄金问答
 - [x] 可选 local_lexical 二阶段重排演示
 
-## v0.2（下一步）— 答案层与可对比性
-- [ ] markdown_heading 切片策略
-- [ ] faithfulness 答案层评测（LLM-as-judge，OpenAI 兼容）
-- [ ] 报告增加分片长度分布直方图
-- [ ] `raglens compare a.yaml b.yaml`：两次实验结果并排对比，直接看出"改配置后变好还是变坏"
-- [ ] golden_qa 支持 expected_chunk_hint，命中片段高亮
+## v0.2.0（已发布）— 答案层与可对比性
+- [x] markdown_heading 切片策略（按 Markdown 标题章节切分）
+- [x] faithfulness 答案层评测（mock 词面裁判 + OpenAI 兼容 LLM 裁判）
+- [x] 报告增加分片长度分布直方图（纯 inline SVG）
+- [x] `raglens compare`：两次实验并排对比，▲ 变好 / ▼ 变差
+- [x] golden_qa 支持 expected_chunk_hint，命中片段 🎯 高亮
+- [x] `--json` 导出机器可读报告，`--min-hit-rate5` CI 阈值阻断（不达标退出码 1）
 
 ## v0.3 — 生态接入
-- [ ] 导出 JSON 报告，对接 CI（阈值不达标即失败）
 - [ ] 接入真实 cross-encoder rerank 模型（bge-reranker）
 - [ ] 常用 embedding 提供商一键切换 preset（bge-m3 / m3e / bge-large-zh）
+- [ ] compare 报告加逐 query 变化明细
+- [ ] PDF 文档加载（pdfminer.six，可选依赖）
 - [ ] awesome-rag / awesome-llmops 收录
 
 ## v1.0

@@ -8,6 +8,7 @@ from typing import Dict, List
 
 from .chunker import chunk_document
 from .embeddings import cosine
+from .judge import judge_faithfulness
 from .metrics import aggregate
 from .reranker import rerank_candidates
 
@@ -54,23 +55,41 @@ def run_experiment(cfg: dict, embedder, docs: dict, golden_qa: list) -> Dict[str
 
             doc_ids = [c.doc_id for c, _ in hits]
             expected = qa["expected_doc"]
+            hint = qa.get("expected_chunk_hint")
+
+            retrieved_items = []
+            for c, score in hits:
+                retrieved_items.append({
+                    "doc": c.doc_id,
+                    "score": round(score, 4),
+                    "preview": c.text[:80],
+                    "hint_hit": bool(hint and hint in c.text),
+                })
+
+            answer = qa.get("answer")
+            faith = None
+            if answer:
+                faith = judge_faithfulness(
+                    answer, [c.text for c, _ in hits], qa["query"], cfg
+                )
+
             query_records.append({
                 "query": qa["query"],
                 "expected_doc": expected,
+                "expected_chunk_hint": hint,
                 "doc_ids": doc_ids,
                 "hit_at_3": 1.0 if expected in doc_ids[:3] else 0.0,
                 "hit_at_5": 1.0 if expected in doc_ids[:5] else 0.0,
                 "rr_at_5": (1.0 / (doc_ids[:5].index(expected) + 1)) if expected in doc_ids[:5] else 0.0,
-                "retrieved": [
-                    {"doc": c.doc_id, "score": round(score, 4), "preview": c.text[:80]}
-                    for c, score in hits
-                ],
+                "faithfulness": faith,
+                "retrieved": retrieved_items,
             })
 
         results[strategy["name"]] = {
             "strategy": strategy,
             "n_chunks": len(chunks),
             "avg_chunk_len": round(sum(c.char_len for c in chunks) / (len(chunks) or 1), 1),
+            "chunk_lengths": [c.char_len for c in chunks],
             "queries": query_records,
             "aggregate": aggregate(query_records, top_k),
         }

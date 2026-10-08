@@ -20,6 +20,9 @@ chunker:
     - name: "sentence"
       type: "sentence"
       max_len: 300
+    - name: "md_heading"
+      type: "markdown_heading"             # 按 Markdown 标题章节切分
+      max_len: 300
 
 embedding:
   provider: "local"                    # local = 零依赖演示；正式评测改 openai_compatible
@@ -39,3 +42,9 @@ rerank:
 
 eval:
   metrics: ["hit_rate@3", "hit_rate@5", "mrr@5"]
+  judge:
+    provider: "mock"                       # none | mock（词面重合）| openai_compatible（LLM 裁判）
+    # 切到 openai_compatible 时：
+    # base_url: "http://localhost:11434/v1"
+    # model: "qwen2.5"
+    # api_key_env: "OPENAI_API_KEY"
