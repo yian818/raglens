@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "raglens"
+version = "0.1.0"
+description = "把 RAG 调参从玄学变成可复现实验：中文 RAG 调试与评测台"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = ["pyyaml>=6.0"]
+
+[project.optional-dependencies]
+remote = ["openai>=1.0"]   # 接入 Ollama / DeepSeek 等 OpenAI 兼容 embedding 时安装
+
+[project.scripts]
+raglens = "rag_lens.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["rag_lens*"]

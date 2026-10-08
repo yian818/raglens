@@ -1,0 +1,41 @@
+# RagLens 配置示例：复制为 config.yaml 后按需修改
+experiment:
+  name: "中文样例调试（默认 local 嵌入器）"
+  output: "report.html"
+
+data:
+  docs_dir: "data/sample_docs"        # 你的文档目录（.md/.txt）
+  golden_qa: "data/golden_qa.jsonl"   # 黄金问答集，每行 {"query": ..., "expected_doc": ...}
+
+chunker:
+  strategies:                          # 想对比几种切片策略就写几种
+    - name: "fixed_256"
+      type: "fixed"
+      chunk_size: 256
+      overlap: 32
+    - name: "fixed_512"
+      type: "fixed"
+      chunk_size: 512
+      overlap: 64
+    - name: "sentence"
+      type: "sentence"
+      max_len: 300
+
+embedding:
+  provider: "local"                    # local = 零依赖演示；正式评测改 openai_compatible
+  dim: 256
+  # —— 正式评测示例（Ollama 本地服务）——
+  # provider: "openai_compatible"
+  # base_url: "http://localhost:11434/v1"
+  # model: "bge-m3"
+  # api_key_env: "OPENAI_API_KEY"       # 从环境变量读 key，不要写进配置
+
+retrieval:
+  top_k: 5
+
+rerank:
+  enabled: false                       # 打开后在 local 词面重叠上演示二阶段重排
+  provider: "local_lexical"
+
+eval:
+  metrics: ["hit_rate@3", "hit_rate@5", "mrr@5"]

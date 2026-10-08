@@ -1,0 +1,30 @@
+name: Bug report
+description: 报告一个可复现的问题
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 发生了什么
+      description: 简单描述现象
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: 配置与环境
+      placeholder: Python 版本 / 操作系统 / config.yaml 关键字段（Key 不要贴）
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期行为

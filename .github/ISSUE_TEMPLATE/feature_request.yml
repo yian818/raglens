@@ -1,0 +1,24 @@
+name: Feature request
+description: 提出一个新功能
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 你想解决什么问题
+      description: 真实使用场景，而不是"我觉得应该有"
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 你设想的方案
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 这个功能对你的优先级
+      options:
+        - 我自己会来写 PR
+        - 很想要但暂时没空写
+        - 有了更好

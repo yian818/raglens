@@ -1,0 +1,3 @@
+pyyaml>=6.0
+# 可选：接入真实 embedding 模型时再装
+# openai>=1.0
