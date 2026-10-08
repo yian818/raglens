@@ -2,6 +2,15 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/) 格式。
 
+## [0.3.0] - 2026-10-08
+
+### Added
+- embedding 一键预设：`preset: bge-m3 / bge-large-zh / m3e / openai`，自动填 base_url/model，显式配置仍可覆盖
+- 可插拔重排后端：`rerank.provider: local_lexical | hf_cross_encoder`，后者接 bge-reranker（可选依赖 `raglens[rerank]`）
+- PDF 文档加载（可选依赖 pdfminer.six；未安装时给出明确安装提示而非崩溃）
+- `raglens compare` 报告新增逐 query 变化明细：哪个问题改好了（↑）、哪个改差了（↓）
+- 测试 17 → 21，覆盖预设展开、PDF 优雅降级、hf 依赖提示、对比明细
+
 ## [0.2.0] - 2026-10-08
 
 ### Added

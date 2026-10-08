@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-green.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-17%20passing-brightgreen.svg)](tests)
+[![Tests](https://img.shields.io/badge/tests-21%20passing-brightgreen.svg)](tests)
 [![Local-first](https://img.shields.io/badge/运行-本地可跑-orange.svg)](config.example.yaml)
 
 > English summary: RagLens is a lightweight, Chinese-friendly RAG debugging & evaluation console. It lets you run chunking-strategy experiments side by side, visualize retrieval hits per query, and score a golden QA set with HitRate@k / MRR — `pip install` and see results in 5 minutes, no API key required.
@@ -124,15 +124,15 @@ raglens/
 
 1. 给 `embeddings.py` 增加 `http` provider：直接 POST 到自托管 embedding 服务
 2. 补一个 `raglens init` 命令：一键在当前目录生成 config.yaml + 样例数据
-3. compare 报告里加"逐 query 变化明细"（哪个问题改好了/改差了）
-4. 支持 PDF 文档加载（pdfminer.six，可选依赖）
-5. 报告页加暗色模式（ prefers-color-scheme）
+3. 报告页加暗色模式（ prefers-color-scheme）
+4. bge-reranker 在真实中文语料上的基准评测脚本（产出对比表格）
+5. 支持 EPUB / docx 文档加载
 
 贡献前请先看 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## 路线图
 
-见 [ROADMAP.md](ROADMAP.md)。v0.2 已完成：markdown 标题切片、分片长度分布图、`--json` 导出与 CI 阈值阻断、`raglens compare` 双实验对比、expected_chunk_hint 片段高亮、faithfulness mock 裁判。下一步接真实 cross-encoder rerank。
+见 [ROADMAP.md](ROADMAP.md)。v0.3 已完成：embedding 模型一键预设（bge-m3/m3e/bge-large-zh）、可插拔重排后端（local_lexical / hf_cross_encoder）、PDF 文档加载、compare 逐 query 变化明细。下一步：真实 cross-encoder 基准与 awesome 收录。
 
 ## 开源协议
 

@@ -1,12 +1,16 @@
 import json
 import os
+import tempfile
 import unittest
+from pathlib import Path
 
 from rag_lens.cli import main as cli_main
 from rag_lens.config import load_config
 from rag_lens.dataset import load_docs, load_golden_qa
-from rag_lens.embeddings import build_embedder
+from rag_lens.embeddings import apply_presets, build_embedder
+from rag_lens.report import render_compare_html
 from rag_lens.retriever import run_experiment
+from rag_lens.reranker import rerank_candidates
 
 
 class TestPipeline(unittest.TestCase):
@@ -78,6 +82,55 @@ class TestPipeline(unittest.TestCase):
         ])
         self.assertEqual(rc, 0)
         self.assertTrue(os.path.exists("/tmp/raglens_compare.html"))
+
+    def test_embedding_preset(self):
+        cfg = apply_presets({"preset": "bge-m3"})
+        self.assertEqual(cfg["provider"], "openai_compatible")
+        self.assertEqual(cfg["model"], "bge-m3")
+        # 显式字段覆盖预设
+        cfg2 = apply_presets({"preset": "bge-m3", "model": "my-own-model"})
+        self.assertEqual(cfg2["model"], "my-own-model")
+        # 未知 preset 明确报错
+        with self.assertRaises(ValueError):
+            apply_presets({"preset": "nope-not-a-model"})
+
+    def test_pdf_graceful_error(self):
+        # 强制模拟"未安装 pdfminer.six"环境，验证友好报错文案
+        import sys
+        saved = sys.modules.get("pdfminer")
+        sys.modules["pdfminer"] = None
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                (Path(td) / "blank.pdf").write_bytes(b"%PDF-1.4 fake")
+                cfg = load_config("config.example.yaml")
+                cfg["data"]["docs_dir"] = td
+                with self.assertRaises(RuntimeError) as ctx:
+                    load_docs(cfg)
+                self.assertIn("pdfminer", str(ctx.exception))
+        finally:
+            sys.modules["pdfminer"] = saved
+
+    def test_hf_rerank_missing_dep_message(self):
+        from rag_lens.chunker import Chunk
+        fake = [(Chunk("d", "x", 0, "任意文本"), 0.5)]
+        cfg = {"rerank": {"enabled": True, "provider": "hf_cross_encoder"}}
+        with self.assertRaises(RuntimeError) as ctx:
+            rerank_candidates("任意问题", fake, 5, cfg=cfg)
+        self.assertIn("sentence-transformers", str(ctx.exception))
+
+    def test_compare_per_query_detail(self):
+        agg = {"hit_rate@3": 1.0, "hit_rate@5": 1.0, "mrr@5": 1.0}
+        left = {"s1": {"aggregate": agg, "queries": [
+            {"query": "Q1", "hit_at_5": 1.0, "rr_at_5": 1.0},
+            {"query": "Q2", "hit_at_5": 0.0, "rr_at_5": 0.0},
+        ]}}
+        right = {"s1": {"aggregate": agg, "queries": [
+            {"query": "Q1", "hit_at_5": 1.0, "rr_at_5": 1.0},
+            {"query": "Q2", "hit_at_5": 1.0, "rr_at_5": 0.5},
+        ]}}
+        html = render_compare_html("old", left, "new", right)
+        self.assertIn("改好了", html)
+        self.assertIn("Q2", html)
 
 
 if __name__ == "__main__":

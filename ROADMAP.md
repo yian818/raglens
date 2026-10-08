@@ -17,12 +17,17 @@
 - [x] golden_qa 支持 expected_chunk_hint，命中片段 🎯 高亮
 - [x] `--json` 导出机器可读报告，`--min-hit-rate5` CI 阈值阻断（不达标退出码 1）
 
-## v0.3 — 生态接入
-- [ ] 接入真实 cross-encoder rerank 模型（bge-reranker）
-- [ ] 常用 embedding 提供商一键切换 preset（bge-m3 / m3e / bge-large-zh）
-- [ ] compare 报告加逐 query 变化明细
-- [ ] PDF 文档加载（pdfminer.six，可选依赖）
+## v0.3.0（已发布）— 生态接入
+- [x] 常用 embedding 提供商一键切换 preset（bge-m3 / bge-large-zh / m3e / openai）
+- [x] 可插拔重排后端：local_lexical / hf_cross_encoder（bge-reranker，可选依赖）
+- [x] PDF 文档加载（pdfminer.six，可选依赖，缺失时友好报错）
+- [x] compare 报告加逐 query 变化明细（哪个问题改好了/改差了）
+
+## v0.4 — 真实场景验证
+- [ ] bge-reranker 在真实中文语料上的基准评测脚本与对比表格
 - [ ] awesome-rag / awesome-llmops 收录
+- [ ] 报告页暗色模式
+- [ ] `raglens init` 脚手架命令
 
 ## v1.0
 - [ ] Web 交互调试台（本地起服务，浏览器里改切片参数即时重跑）

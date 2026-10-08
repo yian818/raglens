@@ -180,6 +180,46 @@ def render_compare_html(left_name: str, left_results: dict, right_name: str, rig
               <td class="num">{arrow}</td>
             </tr>""")
 
+    # ---- 逐 query 变化明细：哪个问题改好了、哪个改差了 ----
+    pq_rows = []
+    for name in left_results:
+        if name not in right_results:
+            continue
+        lq = {q["query"]: q for q in left_results[name]["queries"]}
+        rq = {q["query"]: q for q in right_results[name]["queries"]}
+        for query, lo in lq.items():
+            ro = rq.get(query)
+            if ro is None:
+                continue
+            l_hit, r_hit = lo["hit_at_5"], ro["hit_at_5"]
+            l_rr, r_rr = lo["rr_at_5"], ro["rr_at_5"]
+            if abs(r_hit - l_hit) < 1e-9 and abs(r_rr - l_rr) < 1e-9:
+                continue
+            if r_hit > l_hit:
+                badge, cls = "↑ 改好了", "up"
+            elif r_hit < l_hit:
+                badge, cls = "↓ 改差了", "down"
+            else:
+                badge, cls = "— 名次变化", ""
+            pq_rows.append(f"""
+            <tr class="{cls}">
+              <td class="mono">{_esc(name)}</td>
+              <td>{_esc(query)}</td>
+              <td class="num">{l_hit:.0f} → {r_hit:.0f}</td>
+              <td class="num">{l_rr:.2f} → {r_rr:.2f}</td>
+              <td>{badge}</td>
+            </tr>""")
+    pq_section = (
+        f"""<h2>逐 Query 变化明细</h2>
+      <div class="sub">只列出命中情况或排名发生变化的问题（全部不变则为空）。</div>
+      <table>
+        <thead><tr><th>策略</th><th>问题</th><th>Hit@5 改前→改后</th><th>RR@5 改前→改后</th><th>判断</th></tr></thead>
+        <tbody>{''.join(pq_rows)}</tbody>
+      </table>"""
+        if pq_rows
+        else "<div class='sub'>逐 query 无变化：两次实验每个问题的命中与排名完全一致。</div>"
+    )
+
     return f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -190,6 +230,7 @@ def render_compare_html(left_name: str, left_results: dict, right_name: str, rig
   body {{ font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; margin: 0; background: #f6f8fa; color: #1f2328; line-height: 1.6; }}
   .wrap {{ max-width: 720px; margin: 0 auto; padding: 24px 16px 48px; }}
   h1 {{ font-size: 20px; }}
+  h2 {{ font-size: 15px; margin-top: 28px; }}
   table {{ border-collapse: collapse; width: 100%; background: #fff; font-size: 13px; margin: 12px 0; }}
   th, td {{ border: 1px solid #d0d7de; padding: 7px 10px; text-align: left; }}
   th {{ background: #f0f3f6; }}
@@ -208,6 +249,7 @@ def render_compare_html(left_name: str, left_results: dict, right_name: str, rig
     <thead><tr><th>策略</th><th>指标</th><th>改前</th><th>改后</th><th>变化</th></tr></thead>
     <tbody>{''.join(rows)}</tbody>
   </table>
+  {pq_section}
   <div class="sub">用法：把两次不同配置的实验结果放到一起，直接看出"这次改动到底让 RAG 变好了还是变坏了"。</div>
 </div>
 </body>

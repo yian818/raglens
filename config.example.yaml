@@ -4,7 +4,7 @@ experiment:
   output: "report.html"
 
 data:
-  docs_dir: "data/sample_docs"        # 你的文档目录（.md/.txt）
+  docs_dir: "data/sample_docs"        # 你的文档目录（.md/.txt/.pdf，PDF 需 pip install pdfminer.six）
   golden_qa: "data/golden_qa.jsonl"   # 黄金问答集，每行 {"query": ..., "expected_doc": ...}
 
 chunker:
@@ -25,9 +25,11 @@ chunker:
       max_len: 300
 
 embedding:
-  provider: "local"                    # local = 零依赖演示；正式评测改 openai_compatible
+  provider: "local"                    # local = 零依赖演示；正式评测用 preset 或 openai_compatible
   dim: 256
-  # —— 正式评测示例（Ollama 本地服务）——
+  # —— 方式一：一行 preset 一键接入常用模型（自动填 base_url/model）——
+  # preset: "bge-m3"                  # 可选: bge-m3 / bge-large-zh / m3e / openai
+  # —— 方式二：手写完整配置（Ollama 本地服务）——
   # provider: "openai_compatible"
   # base_url: "http://localhost:11434/v1"
   # model: "bge-m3"
@@ -37,8 +39,10 @@ retrieval:
   top_k: 5
 
 rerank:
-  enabled: false                       # 打开后在 local 词面重叠上演示二阶段重排
-  provider: "local_lexical"
+  enabled: false                       # 打开后做二阶段重排实验
+  provider: "local_lexical"            # local_lexical（零依赖演示）| hf_cross_encoder（真 cross-encoder）
+  # hf_cross_encoder 需先 pip install raglens[rerank]，并指定模型：
+  # model: "BAAI/bge-reranker-v2-m3"
 
 eval:
   metrics: ["hit_rate@3", "hit_rate@5", "mrr@5"]

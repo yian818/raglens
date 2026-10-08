@@ -12,6 +12,31 @@ import os
 from typing import List
 
 
+# 常用 embedding 服务的"一键预设"：填一行 preset 就有默认 base_url/model，
+# 配置里显式写的字段仍会覆盖预设值。解决的是"换个模型要翻文档抄地址"的摩擦。
+EMBEDDING_PRESETS = {
+    "bge-m3": {"provider": "openai_compatible", "base_url": "http://localhost:11434/v1", "model": "bge-m3"},
+    "bge-large-zh": {"provider": "openai_compatible", "base_url": "http://localhost:11434/v1", "model": "bge-large-zh-v1.5"},
+    "m3e": {"provider": "openai_compatible", "base_url": "http://localhost:11434/v1", "model": "m3e"},
+    "openai": {"provider": "openai_compatible", "base_url": "https://api.openai.com/v1", "model": "text-embedding-3-small", "api_key_env": "OPENAI_API_KEY"},
+}
+
+
+def apply_presets(embedding_cfg: dict) -> dict:
+    """把 preset 展开成完整配置：预设为默认值，显式字段优先。"""
+    out = dict(embedding_cfg or {})
+    preset = out.pop("preset", None)
+    if preset:
+        if preset not in EMBEDDING_PRESETS:
+            raise ValueError(
+                f"未知 embedding preset: {preset}（支持: {', '.join(EMBEDDING_PRESETS)}）"
+            )
+        merged = dict(EMBEDDING_PRESETS[preset])
+        merged.update(out)  # 配置里显式写的覆盖预设
+        return merged
+    return out
+
+
 def cosine(a: List[float], b: List[float]) -> float:
     dot = sum(x * y for x, y in zip(a, b))
     na = math.sqrt(sum(x * x for x in a))
@@ -68,8 +93,8 @@ class OpenAICompatibleEmbedder:
 
 
 def build_embedder(cfg: dict):
-    """根据配置构造嵌入器。"""
-    e = cfg["embedding"]
+    """根据配置构造嵌入器（支持 embedding.preset 一键预设）。"""
+    e = apply_presets(cfg["embedding"])
     provider = e.get("provider", "local")
     if provider == "local":
         return LocalHashEmbedder(dim=int(e.get("dim", 256)))

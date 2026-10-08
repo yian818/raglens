@@ -51,7 +51,7 @@ def run_experiment(cfg: dict, embedder, docs: dict, golden_qa: list) -> Dict[str
         for qa, qvec in zip(golden_qa, q_vectors):
             hits = index.search(qvec, top_k)
             if use_rerank:
-                hits = rerank_candidates(qa["query"], hits, top_k)
+                hits = rerank_candidates(qa["query"], hits, top_k, cfg=cfg)
 
             doc_ids = [c.doc_id for c, _ in hits]
             expected = qa["expected_doc"]
