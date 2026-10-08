@@ -1,6 +1,7 @@
 """RagLens 命令行入口。
 
 用法：
+    raglens init                          # 在当前目录脚手架化你的项目
     raglens run --config config.example.yaml [--json out.json] [--min-hit-rate5 0.8]
     raglens compare --old before.yaml --new after.yaml --out compare.html
 """
@@ -15,6 +16,41 @@ from .dataset import load_docs, load_golden_qa
 from .embeddings import build_embedder
 from .report import render_compare_html, render_html
 from .retriever import run_experiment
+
+
+_INIT_CONFIG = """# RagLens 项目配置（由 raglens init 生成）
+experiment:
+  name: "我的第一次评测"
+  output: "report.html"
+
+data:
+  docs_dir: "docs"                   # 把你的 .md/.txt/.pdf 文档放这里
+  golden_qa: "golden_qa.jsonl"      # 黄金问答集：先照着样例写 5~10 条
+
+chunker:
+  strategies:
+    - { name: "fixed_256", type: "fixed", chunk_size: 256, overlap: 32 }
+    - { name: "sentence", type: "sentence", max_len: 300 }
+
+embedding:
+  provider: "local"                  # 先 local 跑通；有 Ollama 后改成 preset: "bge-m3"
+
+retrieval:
+  top_k: 5
+
+rerank:
+  enabled: false
+  provider: "local_lexical"
+"""
+
+_INIT_DOC = """# 我的知识文档 1
+
+把你的业务文档（产品手册、工单历史、FAQ……）复制到 docs/ 目录。
+RagLens 会对它们切片、建索引，然后用黄金问答集去考它。
+"""
+
+_INIT_QA = """{"query": "示例问题：你的产品怎么退款？", "expected_doc": "doc1.md"}
+"""
 
 
 def _note(cfg: dict) -> str:
@@ -82,6 +118,42 @@ def cmd_compare(args) -> int:
     return 0
 
 
+def cmd_init(args) -> int:
+    """在当前目录生成 config.yaml + docs/ + golden_qa.jsonl，已有文件不覆盖。"""
+    cwd = Path.cwd()
+    made = []
+
+    cfg_path = cwd / "config.yaml"
+    if cfg_path.exists():
+        print("· config.yaml 已存在，跳过（不覆盖）")
+    else:
+        cfg_path.write_text(_INIT_CONFIG, encoding="utf-8")
+        made.append("config.yaml")
+
+    docs_dir = cwd / "docs"
+    docs_dir.mkdir(exist_ok=True)
+    doc1 = docs_dir / "doc1.md"
+    if doc1.exists():
+        print("· docs/doc1.md 已存在，跳过")
+    else:
+        doc1.write_text(_INIT_DOC, encoding="utf-8")
+        made.append("docs/doc1.md")
+
+    qa_path = cwd / "golden_qa.jsonl"
+    if qa_path.exists():
+        print("· golden_qa.jsonl 已存在，跳过（不覆盖）")
+    else:
+        qa_path.write_text(_INIT_QA, encoding="utf-8")
+        made.append("golden_qa.jsonl")
+
+    print("[RagLens] 已生成: " + ", ".join(made) if made else "[RagLens] 无需生成（文件都在）")
+    print("\n下一步：")
+    print("  1. 把你的文档放进 docs/")
+    print("  2. 照着样例编辑 golden_qa.jsonl（写 5~10 条真实问题）")
+    print("  3. raglens run --config config.yaml")
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="raglens", description="把 RAG 调参从玄学变成可复现实验")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -99,6 +171,9 @@ def main(argv=None) -> int:
     p_cmp.add_argument("--new", required=True, help="改后配置 yaml")
     p_cmp.add_argument("--out", default="compare.html", help="对比报告输出路径")
     p_cmp.set_defaults(func=cmd_compare)
+
+    p_init = sub.add_parser("init", help="在当前目录脚手架化：生成 config.yaml + docs/ + golden_qa.jsonl")
+    p_init.set_defaults(func=cmd_init)
 
     args = parser.parse_args(argv)
     return args.func(args)

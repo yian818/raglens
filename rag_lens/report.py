@@ -129,6 +129,16 @@ def render_html(experiment_name: str, cfg: dict, results: Dict[str, dict], embed
   .q-head {{ font-weight: 600; font-size: 14px; }}
   .q-meta {{ font-size: 12px; color: #57606a; margin: 2px 0 8px; }}
   .note {{ background: #fff8c5; border-radius: 6px; padding: 10px 12px; font-size: 12px; color: #4d3800; margin-top: 24px; }}
+  @media (prefers-color-scheme: dark) {{
+    body {{ background: #0d1117; color: #e6edf3; }}
+    table, .query {{ background: #161b22; border-color: #30363d; }}
+    th {{ background: #21262d; }}
+    td.preview {{ color: #8b949e; }}
+    tr.hit td {{ background: #14352a; }}
+    .tag {{ background: #21262d; color: #8b949e; }}
+    .sub {{ color: #8b949e; }}
+    .note {{ background: #2d2a14; color: #e3b341; }}
+  }}
 </style>
 </head>
 <body>
@@ -239,6 +249,12 @@ def render_compare_html(left_name: str, left_results: dict, right_name: str, rig
   tr.down td:last-child {{ color: #cf222e; font-weight: 700; }}
   .mono {{ font-family: ui-monospace, Menlo, monospace; font-size: 12px; }}
   .sub {{ color: #57606a; font-size: 13px; }}
+  @media (prefers-color-scheme: dark) {{
+    body {{ background: #0d1117; color: #e6edf3; }}
+    table {{ background: #161b22; border-color: #30363d; }}
+    th {{ background: #21262d; }}
+    .sub {{ color: #8b949e; }}
+  }}
 </style>
 </head>
 <body>

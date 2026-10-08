@@ -23,11 +23,15 @@
 - [x] PDF 文档加载（pdfminer.six，可选依赖，缺失时友好报错）
 - [x] compare 报告加逐 query 变化明细（哪个问题改好了/改差了）
 
-## v0.4 — 真实场景验证
-- [ ] bge-reranker 在真实中文语料上的基准评测脚本与对比表格
-- [ ] awesome-rag / awesome-llmops 收录
-- [ ] 报告页暗色模式
-- [ ] `raglens init` 脚手架命令
+## v0.4.0（已发布）— 上手与真实场景验证
+- [x] `raglens init` 脚手架命令
+- [x] 报告页暗色模式（跟随系统）
+- [x] bge-reranker 重排基准脚本与对比表格
+
+## v0.5 — 让更多人看到
+- [ ] awesome-rag / awesome-llmops 收录（条目文案已备，待提 PR）
+- [ ] Web 交互调试台原型：浏览器里改切片参数即时重跑
+- [ ] golden_qa 难度分级与分层统计
 
 ## v1.0
 - [ ] Web 交互调试台（本地起服务，浏览器里改切片参数即时重跑）

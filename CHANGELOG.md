@@ -2,6 +2,14 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/) 格式。
 
+## [0.4.0] - 2026-10-08
+
+### Added
+- `raglens init`：在当前目录一键脚手架化（config.yaml + docs/ + golden_qa.jsonl，已有文件不覆盖）
+- 报告与对比页暗色模式：跟随系统 `prefers-color-scheme`，无需手动切换
+- `scripts/benchmark_rerank.py`：同一份语料"无重排 vs 加重排"对比表，直接回答"上重排值不值"
+- 测试 21 → 23，覆盖 init 脚手架与暗色样式
+
 ## [0.3.0] - 2026-10-08
 
 ### Added

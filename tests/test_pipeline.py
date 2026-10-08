@@ -132,6 +132,34 @@ class TestPipeline(unittest.TestCase):
         self.assertIn("改好了", html)
         self.assertIn("Q2", html)
 
+    def test_init_scaffold(self):
+        import os as _os
+        cwd = _os.getcwd()
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                _os.chdir(td)
+                self.assertEqual(cli_main(["init"]), 0)
+                self.assertTrue((Path(td) / "config.yaml").exists())
+                self.assertTrue((Path(td) / "docs" / "doc1.md").exists())
+                self.assertTrue((Path(td) / "golden_qa.jsonl").exists())
+                # 二次运行不覆盖已有文件
+                old_cfg = (Path(td) / "config.yaml").read_text(encoding="utf-8")
+                self.assertEqual(cli_main(["init"]), 0)
+                self.assertEqual(
+                    (Path(td) / "config.yaml").read_text(encoding="utf-8"), old_cfg
+                )
+        finally:
+            _os.chdir(cwd)
+
+    def test_report_dark_mode(self):
+        from rag_lens.report import render_html
+        cfg = load_config("config.example.yaml")
+        docs = load_docs(cfg)
+        qa = load_golden_qa(cfg)
+        results = run_experiment(cfg, build_embedder(cfg), docs, qa)
+        html_text = render_html("t", cfg, results, "n")
+        self.assertIn("prefers-color-scheme: dark", html_text)
+
 
 if __name__ == "__main__":
     unittest.main()
